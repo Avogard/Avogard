@@ -1,0 +1,208 @@
+// This is a calculator, which accepts input as a string
+#include <iostream>
+#include <cstring>                   
+#include <stdlib.h> 
+using namespace std;
+const int LEN = 80;    
+const int MAX = 100;   
+
+class Token                      //abstract base class
+{
+    public:
+        virtual void showOperNumber()=0;  //pure virtual member function
+        virtual char getOperator()=0;             
+        virtual float getNumber()=0; 
+};
+
+class Operator : public Token
+{
+    private:
+        char oper;            
+    public:
+        Operator(char c): oper(c)      
+        {   }
+
+        void showOperNumber()    
+        {cout<<oper<<endl; }
+          
+        virtual float getNumber()
+        { return 0; }
+          
+        char getOperator()
+        { return oper;}
+};
+
+class Number : public Token
+{
+    private:
+        float fnum;           
+    public:
+        Number(float f): fnum(f)         
+        {   }
+        
+        void showOperNumber()   
+        {cout<<fnum<<endl;}
+          
+        float getNumber()
+        {return fnum;}
+          
+        virtual char getOperator()
+        { return 0; }
+};
+
+class Stack
+{
+    private:
+        Token* atoken[MAX];                   
+        int top;                       
+    public:
+        Stack()                      
+        { top = 0; }
+           
+        void push(Token* var)     
+        { 
+            if (top < MAX-1)
+                atoken[++top] = var; 
+            else 
+                throw logic_error ("Stack overflow");
+        }
+            
+        Token* pop()                     
+        { 
+            if (top > 0)
+                return atoken[top--]; 
+            else 
+                throw logic_error ("Stack is empty");
+        }
+           
+        int gettop()                  
+        { return top; }
+};
+
+class express
+{
+    private:
+        Stack s;
+        char* pStr;
+        int len;
+    public:
+        express (char* ptr)
+        {
+            pStr=ptr;
+            len =strlen(pStr);
+        }
+        void parse ();     
+        float solve ();      
+};
+
+void express::parse()  //"reads" a string 
+{
+    char sym [LEN];    
+    float lastval;        
+    char lastop;         
+    Number* ptrN = nullptr;
+    Operator* ptrO = nullptr;
+    float n;
+    char Ch;  
+    int j=0;
+    
+    for(j; j<len; j++)          
+    {
+        if (pStr[j]>='0' && pStr[j]<='9' || pStr[j]=='.')
+        {
+            int i=0;
+            while (pStr[j]>='0' && pStr[j]<='9' || pStr[j]=='.')  
+            {
+                sym [i]=pStr[j];
+                j++; i++;
+            }
+            j--;
+            sym [i]='\0';
+            n = atof(sym);
+            ptrN = new Number(n);
+            s.push(ptrN);                                      
+        }
+        else if(pStr[j]=='+' || pStr[j]=='-' || pStr[j]=='*' || pStr[j]=='/')
+        {
+            Ch = pStr[j];
+            if (s.gettop()==1)                                  
+            {
+                ptrO = new Operator(Ch);
+                s.push(ptrO);   
+            }
+            else
+            {
+                lastval=s.pop()->getNumber();               
+                lastop=s.pop()->getOperator();              
+                
+                if( (pStr[j]=='*' || pStr[j]=='/') && (lastop=='+' || lastop=='-') )
+                {
+                    ptrO = new Operator(lastop);   
+                    s.push(ptrO);   
+                    ptrN = new Number(lastval);
+                    s.push(ptrN);   
+                }
+                else                     
+                {
+                    switch(lastop)        
+                    {                  
+                        case '+': ptrN = new Number(s.pop()->getNumber() + lastval); s.push(ptrN); break;
+                        case '-': ptrN = new Number(s.pop()->getNumber() - lastval); s.push(ptrN); break;
+                        case '*': ptrN = new Number(s.pop()->getNumber() * lastval); s.push(ptrN); break;
+                        case '/': ptrN = new Number(s.pop()->getNumber() / lastval); s.push(ptrN); break;
+                        default:  throw logic_error ("Unknown operator");
+                    }  
+                }  
+            ptrO = new Operator(pStr[j]);
+            s.push(ptrO);             
+            }  
+        }  
+   
+        else                           
+            throw logic_error ("Unknown symbol");
+    }
+}
+
+
+
+float express::solve ()  
+{
+    float lastval;              
+    while(s.gettop() > 1)
+    {
+        lastval = s.pop()->getNumber();               
+        Number* ptrN;
+        switch( s.pop()->getOperator() )              
+        {                          
+            case '+': ptrN = new Number(s.pop()->getNumber() + lastval); s.push(ptrN); break;
+            case '-': ptrN = new Number(s.pop()->getNumber() - lastval); s.push(ptrN); break;
+            case '*': ptrN = new Number(s.pop()->getNumber() * lastval); s.push(ptrN); break;
+            case '/': ptrN = new Number(s.pop()->getNumber() / lastval); s.push(ptrN); break;
+            default:  throw logic_error ("Uncnown operator");
+        }  
+    }  
+    return float (s.pop()->getNumber());
+}
+////////////////////////////////////////////////////////////////
+ 
+int main()
+{
+    char ans;            
+                        
+    char str [LEN];
+    cout << "\nEnter an equasion as a string. For example: 2+3*4/3-2"
+           "\nNumbers must be one-digit"
+           "\nAvoid space and parentheses";
+    do
+    {
+        cout << "\nExpression: ";
+        cin >> str;                     
+        express* eptr = new express (str);
+        eptr->parse();
+        cout <<"\nResult: " << eptr->solve();
+        cout << endl;
+        cout << "Another one (y/n)? ";
+        cin >> ans;
+    }   while ( ans == 'y' );
+    return 0;
+ }
