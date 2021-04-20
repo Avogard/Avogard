@@ -7,5 +7,3 @@
 Avogard/Avogard is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 You can click the Preview link to take a look at your changes.
 --->
-
-The majority of projects here are tasks from "Object Oriented Programming in C++" R. Lafore.
