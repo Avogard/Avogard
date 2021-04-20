@@ -1,0 +1,77 @@
+//Custom pointers
+
+#include <iostream>
+ 
+using namespace std;
+ 
+const int MAX = 2;      //size of memory
+float fmemory[MAX];     //memory for float
+int pmemory[MAX];       //memory for pointers
+int fmem_top = 0;       //free space for float
+int pmem_top = 0;       //free space for pointer
+ 
+class Float             //custom "float" type
+{
+    private:
+        int addr;       //index fmemory
+    public:     
+        Float(float a)  //value initialization
+        {
+            fmemory[fmem_top] = a;
+            addr = fmem_top;
+            if (fmem_top > MAX)           
+               throw logic_error ("No free space in memory");
+            fmem_top++;
+        }
+     
+        int operator &()    //index return
+        {
+            return addr;
+        }
+};
+ 
+class ptrFloat          //symulation
+{
+    private:
+        int addr;       //index
+    public:
+        ptrFloat(int a)     //value initialization
+        {
+            pmemory[pmem_top] = a;
+            addr = pmem_top;
+            if (pmem_top > MAX)             //Checking for memory overflow          
+                throw logic_error ("No free space in memory");
+            pmem_top++;
+        }
+     
+        ptrFloat operator = (int a)
+        {
+            return ptrFloat(a);
+        }
+     
+        float& operator *()     //dereferencing a pointer
+        {
+            return fmemory[pmemory[addr]];
+        }
+};
+ 
+int main()
+{
+    Float var1 = 1.234;
+    Float var2 = 5.678;
+
+    ptrFloat ptr1 = &var1;
+    ptrFloat ptr2 = &var2;
+ 
+    cout << " *ptr1 = " << *ptr1  << endl;
+    cout << " *ptr2 = " << *ptr2 << endl;
+ 
+    *ptr1 = 7.123;
+    *ptr2 = 8.456;
+ 
+    cout << " *ptr1 = " << *ptr1 << endl;
+    cout << " *ptr2 = " << *ptr2 << endl;
+ 
+    return 0;
+ 
+}
