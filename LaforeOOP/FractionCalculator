@@ -1,0 +1,157 @@
+//Calculator for fractions. Also reduses them.
+
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+using namespace std;
+
+class Fraction
+{
+    private:
+        int numerator;
+        int denominator;
+    public:
+        Fraction(int num, int den): numerator(num), denominator(den)
+        {  }
+        Fraction(): numerator(0), denominator(1)    
+        {  }
+        friend Fraction reduceFraction(Fraction f);
+        void setNum(const int& valueNum)
+        {
+            numerator = valueNum;
+        }
+        int getNum()const
+        {
+            return numerator;
+        }
+        void setDen(const int& valueDen)
+        {
+            denominator = valueDen;
+        }
+        int getDen()const
+        {
+            return denominator;
+        }
+        Fraction operator+(const Fraction& f2)
+        {
+            int num = numerator * f2.denominator + denominator * f2.numerator;
+            int den = denominator * f2.denominator;
+            Fraction Frac(num, den);
+            return reduceFraction(Frac);
+        }
+        Fraction operator-(const Fraction& f2)
+        {
+            int num = numerator * f2.denominator - denominator * f2.numerator;
+            int den = denominator * f2.denominator;
+            Fraction Frac(num, den);
+            return reduceFraction(Frac);
+        }
+        Fraction operator*(const Fraction& f2)
+        {
+            int num = numerator * f2.numerator;
+            int den = denominator * f2.denominator;
+            Fraction Frac(num, den);
+            return reduceFraction(Frac);
+        }
+        Fraction operator/(const Fraction& f2)
+        {
+            int num = numerator * f2.denominator;
+            int den = denominator * f2.numerator;
+            Fraction Frac(num, den);
+            return reduceFraction(Frac);
+        }
+        bool operator==(const Fraction& f2)const
+        {
+            Fraction f1low=reduceFraction(*this);
+            Fraction f2low=reduceFraction(f2);
+            return ((f1low.numerator==f2low.numerator) and (f1low.denominator==f2low.denominator)) ? true : false;  
+        }
+        bool operator!=(const Fraction& f2)const
+        {
+            return !(*this == f2);
+        }
+        friend ostream& operator<<(ostream& os, Fraction& f);
+        friend istream& operator>>(istream& is, Fraction& f);
+};
+
+ostream& operator<<(ostream& os, Fraction& f)
+{
+    return os << f.numerator << "/" << f.denominator << endl;
+}
+
+istream& operator>>(istream& is, Fraction& f)
+{
+    char ch;
+    cout << "Enter a fraction as num/den: ";
+    is >> f.numerator >> ch >> f.denominator;
+    return is;
+}
+
+int main()
+{
+    char ch;
+    char op;
+    Fraction f1, f2, f3;
+    do
+    {
+        cout << "Enter an expression (fraction 1, than sign, than fraction 2)" << endl;
+        cin >> f1 >> op >> f2;
+        switch (op)
+        {
+            case '+':
+                f3 = f1 + f2;
+                break;
+            case '-':
+                f3 = f1 - f2;
+                break;
+            case '*':
+                f3 = f1 * f2;
+                break;
+            case '/':
+                f3 = f1 / f2;
+                break;
+            cout << f3;
+        }
+        cout << f3;
+        cout << "Continue? (y/n)" << endl;
+        cin >> ch;
+    } while (ch != 'n');
+    return 0;
+}
+
+Fraction reduceFraction(Fraction f) 
+{
+    long tnum, tden, temp, gcd;
+    Fraction fLow;
+    int numerator;
+    int denominator;
+    numerator=f.getNum();
+    denominator=f.getDen();
+    tnum = labs(numerator); 
+    tden = labs(denominator); 
+    if(tden == 0) 
+    {
+        throw logic_error("Zero denominator!");  
+    }
+    else if(tnum == 0)
+    { 
+        numerator=0; 
+        denominator=1; 
+    }
+    while(tnum != 0)
+    {
+        if(tnum < tden) 
+        { 
+            temp = tnum;
+            tnum = tden; 
+            tden = temp; 
+        } 
+        tnum = tnum - tden; 
+    }
+    gcd = tden; 
+    numerator=(numerator / gcd); 
+    denominator=(denominator / gcd);
+    fLow.setNum(numerator);
+    fLow.setDen(denominator);
+    return fLow;
+} 
