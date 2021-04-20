@@ -1,3 +1,5 @@
+// This is a money calculator, which performs basic operations with 2 types of values:  long double and string
+
 #include <iostream>
 #include <string>
 #include <cstring>
