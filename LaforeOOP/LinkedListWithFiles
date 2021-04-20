@@ -1,0 +1,225 @@
+// This is a linked list, which can be written to or read from a file
+
+#include <iostream>
+#include <fstream>
+#include <math.h>
+using namespace std;
+
+unsigned GetNumberOfDigits (unsigned i)
+{
+    return i > 0 ? (int) log10 ((double) i) + 1 : 1;
+}
+
+struct link 
+{
+    int data; 
+    link* next;
+};
+
+class linklist 
+{
+    private:
+        link* first;
+    public:
+        linklist() 
+            { first = nullptr; } 
+        ~linklist();                   
+        linklist(const linklist& l1);                     
+        void operator=(const linklist& l);
+        void addFirst(int d);  
+        void addLast(int d);  
+        void display(); 
+        void writeToFile(string);
+        void readFromFile(string);
+        void clear();   
+};
+
+void linklist::addFirst(int d)
+{
+    link* newlink = new link; 
+    newlink->data = d; 
+    newlink->next = first;  
+    first = newlink;  
+}
+
+void linklist::addLast(int d)
+{
+    link* newlink = new link;  
+    link *last = first;  
+    newlink->data = d;   
+    newlink->next = NULL;   
+    if (first == nullptr)   
+    {   
+        first = newlink;   
+        return;   
+    }   
+    while (last->next != NULL)   
+        last = last->next;   
+    last->next = newlink;   
+    return;   
+}
+
+void linklist::display() 
+{
+    link* current = first;
+    while(current != nullptr)
+    {
+        cout << endl << current->data;
+        current = current->next; 
+    }
+}
+
+void linklist::clear() 
+{
+    link* current = first; 
+    while(current != nullptr)
+    {
+        first = current->next; 
+        delete current; 
+        current = first;
+    }
+}
+
+linklist::~linklist() 
+{
+    this->clear();
+}
+
+void linklist::operator=(const linklist& l)    
+{
+    this->clear();  
+    first = nullptr;
+    link* lcurrent = l.first;
+    while(lcurrent != nullptr)
+    {
+        link* newlink = new link;
+        newlink->data = lcurrent->data;  
+        newlink->next = first;
+        first = newlink;
+        lcurrent = lcurrent->next;  
+    }
+}
+
+linklist::linklist(const linklist& l1)    
+{
+    first = nullptr;
+    link*current =l1.first;   
+    while(current != nullptr ) 
+        {
+            link* newlink = new link;
+            newlink->data = current->data; 
+            newlink->next =first;
+            first = newlink;
+            current =current->next;  
+        }
+}
+
+///////////////////////////////////////////
+
+
+void linklist::writeToFile(string name)
+{
+    fstream linklistStream(name);
+    link* current = first;
+    while(current != nullptr)
+    {
+        linklistStream << current->data << endl;
+        current = current->next; 
+    }
+    linklistStream.close();
+}
+
+
+void linklist::readFromFile(string name)     
+{
+    int element;
+    fstream linklistStream(name);
+    while (!(linklistStream>>std::ws).eof())
+    {
+        linklistStream >> element;
+        this->addLast(element);
+    }
+    linklistStream.close();
+}
+
+int main()
+{
+    cout << "Demontration of mehods: " << endl;
+    string file = "linklist.txt";
+    linklist* l1 = new linklist;
+    linklist* l2 = new linklist;
+    l1->addFirst(123); 
+    l1->addFirst(244);
+    l1->addFirst(345);
+    l1->addFirst(473);
+    l1->addLast(555);
+    l1->addLast(66);
+    l1->addLast(76666);
+    cout << "Original list: ";
+    l1->display();
+    l1->writeToFile(file);
+    l2->readFromFile(file);
+    cout << endl << endl << "List from file: ";
+    l2->display();
+    
+    cout << endl << "===========================================";
+    
+    char answer; 
+    char addAnswer; 
+    char option;  
+
+    linklist* lchoice = new linklist;
+    linklist* lother = new linklist;
+    do
+    {
+        cout << "\n\nChoose an option for current list: " << endl;
+        cout << "Options:" << endl;
+        cout << "a - add elements" << endl;
+        cout << "s - show content" << endl;
+        cout << "w - write to file" << endl;
+        cout << "c - clear the file" << endl;
+        cout << "r - read file to the new list" << endl;
+        cout << "x - exit" << endl;
+        cin >> option;
+        switch (option)
+        {
+            case 'a':
+                cout << "Adding elements: " << endl;
+                do
+                {
+                    cout << "Enter number (to stop adding enter n): ";
+                    int element;
+                    cin >> element;
+                    if (cin.good())
+                        lchoice->addFirst(element);
+                } while (cin.good());
+                break;
+                
+            case 's':
+                cout << "Show content: " << endl;
+                lchoice->display();
+                break;
+                
+            case 'w':
+                lchoice->writeToFile(file);
+                cout << "Content is successfully written" << endl;
+                break;
+            case 'c':
+                lchoice->clear(); 
+                cout << "Content is successfully cleared" << endl;
+                break;
+            case 'r':
+                lother->clear(); 
+                lother->readFromFile(file);
+                cout << "Content is successfully copied to a new list: " << endl;
+                lother->display();
+                break;
+            case 'x':
+                break;
+        }
+        cin.clear();
+        cin.ignore();
+    } while (option != 'x');
+
+    return 0;
+} 
